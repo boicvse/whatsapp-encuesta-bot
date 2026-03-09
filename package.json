@@ -1,0 +1,8 @@
+{
+  "name": "whatsapp-encuesta-bot",
+  "version": "1.0.0",
+  "dependencies": {
+    "@wppconnect-team/wppconnect": "^1.26.0",
+    "node-cron": "^3.0.3"
+  }
+}
