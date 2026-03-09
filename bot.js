@@ -1,8 +1,12 @@
 const wppconnect = require('@wppconnect-team/wppconnect');
 const cron = require('node-cron');
 
+const NOMBRE_GRUPO = 'ASISTENCIA TALLER Tx⚠️';
+
 wppconnect.create({
   session: 'encuesta-bot',
+  autoClose: 0,
+  phoneNumber: '56933706906',
   puppeteerOptions: {
     headless: true,
     args: [
@@ -10,28 +14,64 @@ wppconnect.create({
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage'
     ]
+  },
+  catchLinkCode: (code) => {
+    console.log('CODIGO_DE_VINCULACION:', code);
+  },
+  statusFind: (statusSession) => {
+    console.log('ESTADO_SESION:', statusSession);
   }
 })
 .then((client) => start(client))
-.catch((error) => console.error(error));
+.catch((error) => console.error('ERROR_AL_INICIAR:', error));
 
 function start(client) {
 
-  // horario de Chile: 19:00 todos los días
-  cron.schedule('0 19 * * *', async () => {
+  console.log('BOT_INICIADO');
 
-    const grupo = 'ID_DEL_GRUPO@g.us';
+  // Buscar SOLO el grupo específico
+  client.getAllChats().then((chats) => {
 
-    await client.sendPollMessage(grupo, {
-      name: '¿Asistirás mañana al trabajo?',
-      options: [
-        { name: 'Sí' },
-        { name: 'No' },
-        { name: 'Llegaré tarde - Marco yo' }
-      ]
+    const grupo = chats.find(chat =>
+      chat.isGroup && chat.name === NOMBRE_GRUPO
+    );
+
+    if (!grupo) {
+      console.log('❌ GRUPO NO ENCONTRADO');
+      return;
+    }
+
+    const grupoID = grupo.id._serialized;
+
+    console.log('✅ GRUPO ENCONTRADO');
+    console.log('NOMBRE:', grupo.name);
+    console.log('ID_DEL_GRUPO:', grupoID);
+
+    // Encuesta diaria
+    cron.schedule('0 19 * * *', async () => {
+
+      try {
+
+        await client.sendPollMessage(
+          grupoID,
+          '¿Marcarás asistencia?',
+          [
+            'Sí, yo lo hago😎',
+            'Marquen por mi🤝🏼',
+            'No, no marcaré❌'
+          ],
+          {
+            selectableCount: 1
+          }
+        );
+
+        console.log('ENCUESTA_ENVIADA_OK');
+
+      } catch (error) {
+        console.log('ERROR_ENVIANDO_ENCUESTA:', error);
+      }
+
     });
-
-    console.log('Encuesta enviada');
 
   });
 
