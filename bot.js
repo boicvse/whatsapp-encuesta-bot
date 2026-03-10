@@ -26,53 +26,51 @@ wppconnect.create({
 .catch((error) => console.error('ERROR_AL_INICIAR:', error));
 
 function start(client) {
-
   console.log('BOT_INICIADO');
 
-  // Buscar SOLO el grupo específico
   client.getAllChats().then((chats) => {
-
     const grupo = chats.find(chat =>
       chat.isGroup && chat.name === NOMBRE_GRUPO
     );
 
     if (!grupo) {
-      console.log('❌ GRUPO NO ENCONTRADO');
+      console.log('GRUPO_NO_ENCONTRADO');
       return;
     }
 
     const grupoID = grupo.id._serialized;
 
-    console.log('✅ GRUPO ENCONTRADO');
+    console.log('GRUPO_ENCONTRADO');
     console.log('NOMBRE:', grupo.name);
     console.log('ID_DEL_GRUPO:', grupoID);
 
-    // Encuesta diaria
-    cron.schedule('0 19 * * *', async () => {
+    cron.schedule(
+      '0 22 * * *',
+      async () => {
+        try {
+          await client.sendPollMessage(
+            grupoID,
+            '¿Marcarás asistencia?',
+            [
+              'Sí, yo lo hago😎',
+              'Marquen por mi🤝🏼',
+              'No, no marcaré❌'
+            ],
+            {
+              selectableCount: 1
+            }
+          );
 
-      try {
-
-        await client.sendPollMessage(
-          grupoID,
-          '¿Marcarás asistencia?',
-          [
-            'Sí, yo lo hago😎',
-            'Marquen por mi🤝🏼',
-            'No, no marcaré❌'
-          ],
-          {
-            selectableCount: 1
-          }
-        );
-
-        console.log('ENCUESTA_ENVIADA_OK');
-
-      } catch (error) {
-        console.log('ERROR_ENVIANDO_ENCUESTA:', error);
+          console.log('ENCUESTA_ENVIADA_OK');
+        } catch (error) {
+          console.log('ERROR_ENVIANDO_ENCUESTA:', error);
+        }
+      },
+      {
+        timezone: 'America/Santiago'
       }
-
-    });
-
+    );
+  }).catch((error) => {
+    console.log('ERROR_OBTENIENDO_CHATS:', error);
   });
-
 }
