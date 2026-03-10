@@ -55,8 +55,8 @@ function start(client) {
               grupoID,
               '¿Marcarás asistencia?',
               [
-                'Sí, yo lo hago😎',
-                'Marquen por mi🤝🏼',
+                'El primero que llega marca🤝🏼',
+                'Sí, yo marco por mi😎',
                 'No, no marcaré❌'
               ],
               { selectableCount: 1 }
